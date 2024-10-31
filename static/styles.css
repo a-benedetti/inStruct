@@ -1,0 +1,53 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Left Panel Styling */
+.panel-left {
+    width: 25%;
+    min-width: 200px; /* Temporary min-width, JavaScript will adjust this dynamically */
+    padding: 20px;
+    background-color: #b0e9ff;
+    overflow-y: auto;
+    border-right: 1px solid #b0e9ff;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    resize: horizontal; /* Allows horizontal resizing */
+}
+
+.viewer-right {
+    flex-grow: 1; /* Allows the right panel to adjust as the left panel is resized */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Visualization Options Styling */
+.visualization-options {
+    padding: 10px 20px;
+    background-color: transparent;
+    z-index: 10;
+}
+
+/* 3D Viewer Styling */
+#protein-viewer {
+    flex-grow: 1;
+    width: 100%;
+}
+
+.divider {
+    width: 5px;
+    cursor: col-resize;
+    background-color: #b0e9ff;
+    z-index: 5;
+}

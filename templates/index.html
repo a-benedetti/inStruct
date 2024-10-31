@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Protein and Ligand Preparation Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body onload="clearInputs()"> <!-- Clear inputs on page load -->
+    <h1>Protein and Ligand Preparation Tool</h1>
+    <div class="container">
+        <!-- Selection Panel -->
+        <div class="selection-panel">
+            <label>Please choose the type of molecule you want to prepare:</label><br><br>
+            <input type="radio" id="ligand" name="moleculeType" value="ligand">
+            <label for="ligand">Ligand</label><br>
+            <input type="radio" id="protein" name="moleculeType" value="protein">
+            <label for="protein">Protein</label>
+        </div>
+
+        <!-- Ligand Input Panel -->
+        <div id="ligand-panel" class="input-panel" style="display:none;">
+            <h2>Ligand Input</h2>
+            <form id="ligand-form" action="{{ url_for('ligand_processing') }}" method="post" enctype="multipart/form-data">
+                <label for="ligand-file">Upload Ligand File:</label><br>
+                <input type="file" id="ligand-file" name="ligand-file" accept=".smi,.smiles,.mol2,.sdf,.pdb,.mol,.cif"><br><br>
+                
+                <label for="chembl-id">Or enter ChEMBL ID:</label>
+                <input type="text" id="chembl-id" name="chembl-id" list="chembl-suggestions">
+                <datalist id="chembl-suggestions"></datalist>
+                
+                <label for="inchi">Or enter InChI:</label>
+                <input type="text" id="inchi" name="inchi"><br><br>
+                
+                <label for="smiles-input">Or paste SMILES string:</label><br>
+                <textarea id="smiles-input" name="smiles-input" rows="4" cols="50"></textarea><br><br>
+                
+                <input type="submit" value="Submit Ligand">
+            </form>
+        </div>
+
+        <!-- Protein Input Panel -->
+        <div id="protein-panel" class="input-panel" style="display:none;">
+            <h2>Protein Input</h2>
+            <div class="selection-subpanel">
+                <label>Please select the input type for the protein:</label><br><br>
+                <input type="radio" id="use-pdb" name="proteinInputType" value="pdb" disabled>
+                <label for="use-pdb" class="inactive">PDB ID</label><br>
+                <input type="radio" id="use-file" name="proteinInputType" value="file" disabled>
+                <label for="use-file" class="inactive">Protein File</label>
+            </div>
+
+            <!-- PDB ID Input (initially inactive) -->
+            <form id="pdb-form" action="{{ url_for('protein_processing') }}" method="post" style="display:none;">
+                <label for="pdb-code">Enter PDB Code:</label>
+                <input type="text" id="pdb-code" name="pdb-code" maxlength="4" list="pdb-suggestions">
+                <datalist id="pdb-suggestions"></datalist>
+                <br><br>
+                <input type="submit" value="Submit PDB ID">
+            </form>
+
+            <!-- Protein File Input (initially inactive) -->
+            <form id="file-form" action="{{ url_for('protein_processing') }}" method="post" enctype="multipart/form-data" style="display:none;">
+                <label for="protein-file">Upload Protein File:</label><br>
+                <input type="file" id="protein-file" name="protein-file" accept=".pdb,.cif,.ent,.mmcif">
+                <br><br>
+                <input type="submit" value="Submit Protein File">
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>

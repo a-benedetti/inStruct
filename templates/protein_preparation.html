@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Protein Preparation Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+    <script src="{{ url_for('custom_static', filename='protein_preparation.js') }}?v={{ version }}" type="application/javascript"></script>
+</head>
+<body>
+
+<div class="container">
+    <!-- Data Attributes for pdb_id and file_url -->
+    <div id="protein-preparation" data-pdb-id="{{ pdb_id }}" data-file-url="{{ file_url }}"></div>
+
+    <!-- Left Panel for Controls -->
+    <div class="panel-left">
+        <h2>Protein Preparation Workflow</h2>
+    
+        <!-- Step Sections -->
+        <div id="step-sections">
+            <!-- Step 1: Structure Selection and Input -->
+            <div class="step-section" id="step-1">
+                <h3>1. Structure Selection and Input</h3>
+                <div id="toggle-container">
+                    <label>Chain Selection:</label>
+                    <select id="chain-selection">
+                        <!-- Options dynamically filled -->
+                    </select>
+    
+                    <label>Ligand Selection:</label>
+                    <select id="ligand-selection">
+                        <!-- Options dynamically filled -->
+                    </select>
+    
+                    <label>Model Selection:</label>
+                    <select id="model-selection">
+                        <!-- Options dynamically filled -->
+                    </select>
+                </div>
+                <button class="next-button" onclick="submitStructureSelection(); navigateSteps(2)">Next &gt;&gt;</button>
+            </div>
+    
+            <div class="step-section" id="step-2" style="display: none;">
+                <h3>2. Structural Completeness and Repair</h3>
+                <div id="missing-atoms-section">
+                    <label><input type="checkbox" id="add-missing-atoms"> Add Missing Atoms</label>
+                    <div id="missing-atoms-list">
+                        <!-- Missing atoms will be dynamically listed here -->
+                    </div>
+                </div>
+                <div id="missing-residues-section">
+                    <label><input type="checkbox" id="add-missing-residues"> Add Missing Residues/Repair Chain Breaks</label>
+                    <div id="missing-residues-list">
+                        <!-- Missing residues/chain breaks will be dynamically listed here -->
+                    </div>
+                </div>
+                <button class="prev-button" onclick="navigateSteps(1)">&lt;&lt; Previous</button>
+                <button class="next-button" onclick="navigateSteps(3)">Next &gt;&gt;</button>
+            </div>
+            
+    
+            <!-- Step 3: Solvent and Ligand Management -->
+            <div class="step-section" id="step-3" style="display: none;">
+                <h3>3. Solvent and Ligand Management</h3>
+                <label><input type="checkbox" id="remove-solvent"> Remove Solvent</label><br>
+                <label><input type="checkbox" id="retain-ligands"> Retain Ligands</label><br>
+                <button class="prev-button" onclick="navigateSteps(2)">&lt;&lt; Previous</button>
+                <button class="next-button" onclick="navigateSteps(4)">Next &gt;&gt;</button>
+            </div>
+    
+            <!-- Step 4: Hydrogen Addition and Protonation State Adjustment -->
+            <div class="step-section" id="step-4" style="display: none;">
+                <h3>4. Hydrogen Addition and Protonation State Adjustment</h3>
+                <label><input type="checkbox" id="add-hydrogens"> Add Hydrogens</label><br>
+                <label for="ph-level">Protonation State at pH:</label>
+                <input type="number" id="ph-level" min="0" max="14">
+                <button class="prev-button" onclick="navigateSteps(3)">&lt;&lt; Previous</button>
+                <button class="next-button" onclick="navigateSteps(5)">Next &gt;&gt;</button>
+            </div>
+    
+            <!-- Step 5: Structural Optimization -->
+            <div class="step-section" id="step-5" style="display: none;">
+                <h3>5. Structural Optimization</h3>
+                <label><input type="checkbox" id="optimize-side-chains"> Optimize Side Chains</label><br>
+                <label><input type="checkbox" id="assign-disulfide-bonds"> Assign Disulfide Bonds</label><br>
+                <button class="prev-button" onclick="navigateSteps(4)">&lt;&lt; Previous</button>
+                <button class="next-button" onclick="navigateSteps(6)">Next &gt;&gt;</button>
+            </div>
+    
+            <!-- Step 6: Energy Minimization -->
+            <div class="step-section" id="step-6" style="display: none;">
+                <h3>6. Energy Minimization</h3>
+                <label><input type="checkbox" id="minimize-structure"> Apply Energy Minimization</label><br>
+                <button class="prev-button" onclick="navigateSteps(5)">&lt;&lt; Previous</button>
+                <button id="submit-button" onclick="submitPreparation()">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel for 3D Viewer and Visualization Controls -->
+    <div class="viewer-right">
+        <!-- Visualization Options Panel -->
+        <div class="visualization-options">
+            <h3>Visualization Options</h3>
+            <label for="representation">Representation Mode:</label>
+            <select id="representation">
+                <option value="ribbons">Ribbons (default)</option>
+                <option value="all-atoms">All Atoms</option>
+                <option value="ribbons-sidechains">Ribbons and Side Chains</option>
+            </select>
+        </div>
+        <div id="protein-viewer"></div>
+    </div>
+</div>
+
+</body>
+</html>
