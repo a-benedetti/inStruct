@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const viewer = $3Dmol.createViewer("protein-viewer", { backgroundColor: "white" });
     let proteinModel;
 
-    // Define the navigateSteps function globally
+    // Define navigateSteps globally
     window.navigateSteps = function(step) {
         document.querySelectorAll(".step-section").forEach(section => {
             section.style.display = "none";
@@ -20,11 +20,11 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     };
 
-    // Submit function for Step 1
+    //STEP 1
     function submitStructureSelection() {
         console.log("Submitting structure selection...");
     
-        // Get selected model, chains, and ligands
+        // get selected model, chains, and ligands
         const modelSelectElem = document.getElementById("model-selection");
         const selectedModel = modelSelectElem ? modelSelectElem.value : null;
         const selectedChains = Array.from(document.querySelectorAll("#toggle-container input[type='checkbox'][id^='Chain-']:checked")).map(input => input.id.split('-')[1]);
@@ -34,36 +34,30 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log("Selected chains:", selectedChains);
         console.log("Selected ligands:", selectedLigands);
     
-        // Filter the initial PDB structure based on selections
+        // filter PDB structure based on selections
         const filteredStructure = filterPDBStructure(initialStructure, selectedModel, selectedChains, selectedLigands);
-    
-        // Store the filtered structure in structureStates for this step
         structureStates['step1'] = filteredStructure;
     
-        // Display the filtered PDB data in a popup window
+        // display filtered PDB
         const popupWindow = window.open("", "FilteredStructure", "width=600,height=400");
         popupWindow.document.write("<pre>" + structureStates['step1'] + "</pre>");
         popupWindow.document.title = "Filtered Structure After Step 1";
     
-        // Update the viewer with the filtered structure
+        // update the viewer 
         updateViewer(filteredStructure);
     }
     
-    // Function to filter PDB structure based on selected model, chains, and ligands
+    // filter PDB structure based on selected model, chains, and ligands
     function filterPDBStructure(pdbData, model, chains, ligands) {
         let inSelectedModel = !model; // True if no model selection
         const filteredData = pdbData.split("\n").filter(line => {
-            // Check if line has enough characters
+            
             if (line.length < 22) return false;
-    
-            // Handle model lines
             if (line.startsWith("MODEL")) {
                 inSelectedModel = model ? line.includes(model) : true;
                 return inSelectedModel;
             }
-            if (!inSelectedModel) return false; // Skip lines if not in selected model
-    
-            // Handle ATOM and HETATM lines for chains and ligands
+            if (!inSelectedModel) return false;
             const isAtom = line.startsWith("ATOM");
             const isHetatm = line.startsWith("HETATM");
             const chainId = line[21].trim();
@@ -78,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function() {
         return filteredData;
     }
     
-    // Function to update the viewer with filtered structure data
+    // update the viewer with filtered structure data
     function updateViewer(structureData) {
         viewer.removeAllModels();
         proteinModel = viewer.addModel(structureData, "pdb");
@@ -90,9 +84,9 @@ document.addEventListener("DOMContentLoaded", function() {
     
     
     
-    window.submitStructureSelection = submitStructureSelection;  // Make it globally accessible
+    window.submitStructureSelection = submitStructureSelection;  // make it globally accessible!!
 
-    // Function to filter structure based on model, chains, and ligands
+    // filter structure based on model, chains, and ligands
     function filterStructure(structureData, model, chains, ligands) {
         const filteredData = structureData.split("\n").filter(line => {
             const isModel = model ? line.startsWith("MODEL") && line.includes(model) : true;
@@ -104,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function() {
         return filteredData;
     }
 
-    // Function to update viewer with the selected structure and apply zoom
+    // update viewer with the selected structure and apply zoom
     function updateViewer(structureData) {
         viewer.removeAllModels();
         proteinModel = viewer.addModel(structureData, "pdb");
@@ -113,14 +107,14 @@ document.addEventListener("DOMContentLoaded", function() {
         viewer.render();
     }
 
-    // Default styling for the initial load
+    // Default styling
     function applyDefaultStyle() {
         viewer.setStyle({ hetflag: false }, { cartoon: { color: "spectrum" } });
         viewer.setStyle({ hetflag: true }, { stick: { color: "orange" } });
         viewer.render();
     }
 
-    // Load the initial PDB data
+    // Load initial PDB data
     function loadProteinStructure(pdbData) {
         proteinModel = viewer.addModel(pdbData, "pdb");
         initialStructure = pdbData;  
@@ -130,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function() {
         viewer.zoomTo();  // Ensure the initial structure is centered
     }
 
-    // Parse PDB data to get available chains, ligands, and models
+    // parse PDB 
     function parsePDBData(pdbData) {
         const chains = new Set();
         const ligands = new Set();
@@ -160,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function() {
         };
     }
 
-    // Add toggle sections for chains, ligands, and models
+    // toggle chains/ligands/models
     function addToggleSections(chains, ligands, models) {
         const toggleContainer = document.getElementById("toggle-container");
         toggleContainer.innerHTML = ""; 
@@ -191,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Add individual toggle button
+    // individual toggle button
     function addToggle(identifier, type, section) {
         const toggle = document.createElement("input");
         toggle.type = "checkbox";
@@ -209,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function() {
         section.appendChild(toggle);
     }
 
-    // Toggle visibility based on type (Chain, Ligand, or Model)
+    // Toggle visibility based on type
     function toggleVisibility(identifier, type, isVisible) {
         const selection = type === "Chain" ? { chain: identifier }
                         : type === "Ligand" ? { resn: identifier }
@@ -239,8 +233,8 @@ document.addEventListener("DOMContentLoaded", function() {
             viewer.setStyle({ hetflag: true }, { stick: { color: "orange" } });
         } else if (mode === "ribbons-sidechains") {
             viewer.setStyle({ hetflag: false, sidechain: false }, { cartoon: { color: "spectrum" } });
-            viewer.setStyle({ hetflag: false, sidechain: true }, { stick: { color: "spectrum" } });
-            viewer.setStyle({ hetflag: true }, { stick: { color: "spectrum" } });
+            viewer.setStyle({ hetflag: false, sidechain: true }, { stick: { color: "spectrum" } }); //FIX SIDECHAIN FLAG!!
+            viewer.setStyle({ hetflag: true }, { stick: { color: "spectrum" } }); 
         }
         viewer.render();
     });
@@ -268,7 +262,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
 
-    //Step2:fetch missing atoms
+    //STEP 2
     function fetchMissingAtoms(pdbData) {
         fetch('/identify_missing_atoms', {
             method: 'POST',
@@ -278,7 +272,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(missingAtoms => {
             const missingAtomsList = document.getElementById("missing-atoms-list");
-            missingAtomsList.innerHTML = ""; // Clear previous contents
+            missingAtomsList.innerHTML = ""; //clear previous
     
             if (missingAtoms.length === 0) {
                 missingAtomsList.innerHTML = "<p>No missing atoms identified</p>";
