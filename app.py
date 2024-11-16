@@ -10,7 +10,7 @@ from Bio.PDB.Structure import Structure
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads')
-app.secret_key = 'your_secret_key'  # Necessary for flashing messages
+app.secret_key = 'your_secret_key'  # for flashing messages
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 
 
@@ -18,7 +18,6 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 PROTEIN_FORMATS = {'pdb', 'pdbqt', 'mmcif', 'pdbx/mmcif', 'xyz', 'psf'}
 LIGAND_FORMATS = {'mol', 'mol2', 'sdf', 'pdb', 'xyz', 'pdbqt', 'cml'}
 
-# Ensure the upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 @app.route('/')
@@ -27,12 +26,11 @@ def index():
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    # Serve files from the 'uploads' folder in the root directory
+    #serve uploaded files
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/static/<path:filename>')
 def custom_static(filename):
-    # Check if the file is JavaScript and explicitly set MIME type
     if filename.endswith('.js'):
         response = make_response(send_from_directory('static', filename))
         response.headers['Content-Type'] = 'application/javascript'
@@ -46,12 +44,13 @@ def ligand_processing():
     chembl_id = request.form.get('chembl-id').upper() if request.form.get('chembl-id') else None
     inchi = request.form.get('inchi').upper() if request.form.get('inchi') else None
 
+    #debug!!!
     if chembl_id:
         if validate_chembl(chembl_id):
-            # ChEMBL ID is valid
+            # ChEMBL ID valid
             return jsonify({"success": True, "message": "ChEMBL ID validated successfully."})
         else:
-            # Invalid ChEMBL ID
+            # ChEMBL ID invalid
             return jsonify({"success": False, "message": "ChEMBL ID not found in the database."})
 
     elif file and file.filename != '':
@@ -86,7 +85,6 @@ def protein_processing():
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
-            # Use 'url_for' to generate the correct URL for the uploaded file
             file_url = url_for('uploaded_file', filename=filename, _external=True)
             return jsonify({"success": True, "file_url": file_url})
         else:
@@ -100,7 +98,7 @@ def autocomplete_pdb():
     if len(query) < 1:
         return jsonify([])
 
-    # Proper JSON payload for RCSB PDB API
+    #JSON payload for RCSB PDB API
     payload = {
         "query": {
             "type": "terminal",
@@ -123,7 +121,6 @@ def autocomplete_pdb():
 
     if response.status_code == 200:
         data = response.json()
-        # Extract the identifiers from the response
         suggestions = [entry['identifier'] for entry in data.get("result_set", [])]
         return jsonify(suggestions)
     else:
@@ -134,29 +131,29 @@ def autocomplete_pdb():
 def autocomplete_chembl():
     query = request.args.get('q', '').upper()
     
-    # Only start autocomplete if query is "CHEMBL" followed by one character
+    #only start autocomplete if query is "CHEMBL" + character
     if not query.startswith("CHEMBL") or len(query) < 7:
         return jsonify([])
 
-    # Search ChEMBL API for matches
+    #search ChEMBL API 
     url = f"https://www.ebi.ac.uk/chembl/api/data/molecule?molecule_chembl_id__startswith={query}&limit=5"
     headers = {'Accept': 'application/json'}
     response = requests.get(url, headers=headers)
 
-    # Check if the response is JSON, otherwise print the raw response for debugging
+    #check if the response is JSON
     if response.status_code == 200:
         try:
             data = response.json()
-            # Extract ChEMBL IDs and sort by publication date if available
+            #extract ChEMBL IDs
             suggestions = sorted(
                 [molecule['molecule_chembl_id'] for molecule in data.get("molecules", [])],
-                reverse=True  # Sort by newest or a relevant popularity measure if provided
+                reverse=True 
             )[:5]
             return jsonify(suggestions)
         except ValueError:
-            # JSON decoding failed, print the response content for debugging
+            #DEBUG!!
             print("Unexpected response content:", response.text)
-            return jsonify([])  # Return an empty JSON response for autocomplete
+            return jsonify([])
     else:
         print(f"Error fetching ChEMBL data: {response.status_code}")
         return jsonify([])
@@ -171,21 +168,21 @@ def protein_preparation():
 def identify_missing_atoms():
     pdb_data = request.json.get('pdb_data')
     
-    # Parse the PDB structure
+    #parse PDB
     parser = PDBParser(QUIET=True)
     structure = parser.get_structure("protein", pdb_data)
     
-    # Identify missing atoms
+    #find missing atoms
     missing_atoms = []
     
     for model in structure:
         for chain in model:
             for residue in chain:
-                if is_aa(residue, standard=True):  # Only consider standard amino acids
+                if is_aa(residue, standard=True):  #only consider standard amino acids (ADD NON STANDARDS HERE!!!)
                     expected_atoms = set(atom.name for atom in residue)
                     full_atoms = set(residue.atom_names)
                     
-                    # Identify which atoms are missing by comparing with expected atoms
+                    #find missing atoms
                     missing = expected_atoms - full_atoms
                     if missing:
                         missing_atoms.append({
@@ -195,20 +192,20 @@ def identify_missing_atoms():
                             "missing_atoms": list(missing)
                         })
 
-    # Send the list of missing atoms back to the frontend
     return jsonify(missing_atoms)
 
 
-# Helper function to validate InChI
+#helper function: validate InChI
 def validate_inchi(inchi):
-    # Placeholder: You can use a chemistry API for validation
+    #PLACEHOLDER
     return True  # Assume valid for now
 
-# Helper function to validate PDB ID
+#helper function: validate PDB ID
 def validate_pdb_code(pdb_code):
     response = requests.get(f"https://files.rcsb.org/download/{pdb_code}.pdb")
     return response.status_code == 200
 
+#helper function: validate ChEMBL ID
 def validate_chembl(chembl_id):
     url = f"https://www.ebi.ac.uk/chembl/api/data/molecule/{chembl_id}"
     headers = {'Accept': 'application/json'}
