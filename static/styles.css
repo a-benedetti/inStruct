@@ -12,16 +12,16 @@ body {
     width: 100vw;
 }
 
-/* Left Panel Styling */
+/* Left Panel */
 .panel-left {
     width: 25%;
-    min-width: 200px; /* Temporary min-width, JavaScript will adjust this dynamically */
+    min-width: 200px; 
     padding: 20px;
     background-color: #b0e9ff;
     overflow-y: auto;
     border-right: 1px solid #b0e9ff;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    resize: horizontal; /* Allows horizontal resizing */
+    resize: horizontal; 
 }
 
 .viewer-right {
